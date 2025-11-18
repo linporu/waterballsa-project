@@ -14,6 +14,10 @@ services:
       - SERVER_PORT=8080
     ports:
       - "${BACKEND_PORT:-8080}:8080"
+    volumes:
+      - ./www_root/waterballsa-backend/src:/app/src
+      - ./www_root/waterballsa-backend/pom.xml:/app/pom.xml
+      - ./www_root/waterballsa-backend/checkstyle.xml:/app/checkstyle.xml
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
       interval: 15s
@@ -33,6 +37,13 @@ services:
       - NEXT_PUBLIC_API_URL_INTERNAL=http://backend:8080
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      # Mount source code for hot reload development
+      - ./www_root/waterballsa-frontend:/app
+      # Anonymous volume to prevent host node_modules from overwriting container's
+      # This ensures dependencies are compiled for the container's Linux environment
+      # Reference: https://note.wedsatcoming.com/docs/learn-note/為什麼在Docker中使用匿名volume處理node_modules是個好方法？
+      - /app/node_modules
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
       interval: 30s
