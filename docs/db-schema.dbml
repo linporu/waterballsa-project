@@ -14,8 +14,8 @@ Enum user_role {
 
 Table users {
   id bigserial [primary key]
-  username varchar(255) [not null, unique, note: '帳號：英數字，有長度上限']
-  password_hash varchar(255) [not null, note: '密碼雜湊值']
+  username varchar(50) [not null, unique, note: '帳號：英數字，有長度上限']
+  password_hash varchar(72) [not null, note: '密碼雜湊值']
   role user_role [not null, default: 'STUDENT', note: '使用者角色']
   experience_points integer [not null, default: 0, note: '經驗值，起始為0']
   level integer [not null, default: 1, note: '等級，起始為1']
@@ -33,7 +33,7 @@ Table users {
 
 Table access_tokens {
   id bigserial [primary key]
-  token_jti varchar(255) [not null, unique, note: 'JWT Token ID (jti claim)']
+  token_jti varchar(64) [not null, unique, note: 'JWT Token ID (jti claim)']
   user_id bigint [not null, ref: > users.id, note: '關聯的使用者 ID']
   expires_at timestamp [not null, note: 'Token 過期時間']
   invalidated_at timestamp [not null, default: `now()`, note: 'Token 失效時間（登出時間）']
