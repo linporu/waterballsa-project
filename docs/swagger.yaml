@@ -41,17 +41,10 @@ paths:
                 $ref: '#/components/schemas/HealthResponse'
               examples:
                 healthy:
-                  summary: All components healthy
+                  summary: Database is healthy
                   value:
                     status: UP
-                    components:
-                      application:
-                        status: UP
-                      database:
-                        status: UP
-                        details:
-                          database: PostgreSQL
-                          validConnection: true
+                    database: UP
         '503':
           description: Service is unavailable
           content:
@@ -63,14 +56,7 @@ paths:
                   summary: Database connection failed
                   value:
                     status: DOWN
-                    components:
-                      application:
-                        status: UP
-                      database:
-                        status: DOWN
-                        details:
-                          database: PostgreSQL
-                          validConnection: false
+                    database: DOWN
 
 components:
   schemas:
@@ -78,7 +64,7 @@ components:
       type: object
       required:
         - status
-        - components
+        - database
       properties:
         status:
           type: string
@@ -86,52 +72,9 @@ components:
             - UP
             - DOWN
           description: Overall health status of the service
-        components:
-          type: object
-          description: Health status of individual components
-          required:
-            - application
-            - database
-          properties:
-            application:
-              $ref: '#/components/schemas/ComponentHealth'
-            database:
-              $ref: '#/components/schemas/DatabaseHealth'
-
-    ComponentHealth:
-      type: object
-      required:
-        - status
-      properties:
-        status:
+        database:
           type: string
           enum:
             - UP
             - DOWN
-          description: Component health status
-
-    DatabaseHealth:
-      type: object
-      required:
-        - status
-        - details
-      properties:
-        status:
-          type: string
-          enum:
-            - UP
-            - DOWN
-          description: Database health status
-        details:
-          type: object
-          required:
-            - database
-            - validConnection
-          properties:
-            database:
-              type: string
-              example: PostgreSQL
-              description: Database type
-            validConnection:
-              type: boolean
-              description: Whether the database connection is valid
+          description: Database connection health status
