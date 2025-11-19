@@ -19,7 +19,8 @@ services:
       - ./www_root/waterballsa-backend/pom.xml:/app/pom.xml
       - ./www_root/waterballsa-backend/checkstyle.xml:/app/checkstyle.xml
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      test:
+        ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
       interval: 15s
       timeout: 15s
       retries: 10
@@ -38,17 +39,12 @@ services:
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     volumes:
-      # Mount only source directories for hot reload development
-      # Explicitly exclude node_modules to use container's Linux-compiled dependencies
-      - ./www_root/waterballsa-frontend/src:/app/src
-      - ./www_root/waterballsa-frontend/public:/app/public
-      - ./www_root/waterballsa-frontend/next.config.ts:/app/next.config.ts
-      - ./www_root/waterballsa-frontend/tsconfig.json:/app/tsconfig.json
-      - ./www_root/waterballsa-frontend/tailwind.config.ts:/app/tailwind.config.ts
-      - ./www_root/waterballsa-frontend/postcss.config.mjs:/app/postcss.config.mjs
-      - ./www_root/waterballsa-frontend/components.json:/app/components.json
-      # Keep node_modules inside container (Linux-compiled)
-      # No mount = uses container's version built during docker build
+      # Mount entire directory for hot reload - automatically includes all files
+      - ./www_root/waterballsa-frontend:/app
+      # Use named volumes to exclude node_modules and .next from host mount
+      # This ensures container uses Linux-compiled dependencies and build cache
+      - frontend_node_modules:/app/node_modules
+      - frontend_next_cache:/app/.next
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
       interval: 30s
@@ -113,3 +109,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+volumes:
+  frontend_node_modules:
+  frontend_next_cache:
