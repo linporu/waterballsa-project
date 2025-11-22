@@ -1,0 +1,249 @@
+detail:
+  get:
+    tags:
+      - Missions
+    summary: Get mission details
+    description: |
+      Returns detailed information about a specific mission including content and rewards.
+
+      **Note:** This endpoint does NOT include user progress. Use GET /users/{userId}/missions/{missionId}/progress for progress information.
+
+      **Authentication:**
+      - Requires valid JWT token
+
+      **Response Includes:**
+      - Mission basic information (id, chapterId, journeyId, type, title, description)
+      - Content array (can have multiple content items like videos, articles, forms)
+      - Reward information (experience points)
+      - Free preview flag
+      - Creation timestamp
+
+      **Content Structure:**
+      - Each mission can have multiple content items
+      - Content types: video, article, form
+      - Videos include durationSeconds field
+
+      **Free Preview:**
+      - All users can access missions with isFreePreview: true
+      - Other missions require journey purchase (MVP: all accessible)
+    operationId: getMissionDetail
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: journeyId
+        in: path
+        required: true
+        description: Journey ID
+        schema:
+          type: integer
+          example: 1
+      - name: missionId
+        in: path
+        required: true
+        description: Mission ID
+        schema:
+          type: integer
+          example: 1
+    responses:
+      '200':
+        description: Successfully retrieved mission details
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/missions.yaml#/MissionDetail'
+            examples:
+              videoMission:
+                summary: Video mission example
+                value:
+                  id: 1
+                  chapterId: 8
+                  journeyId: 1
+                  type: 'VIDEO'
+                  title: '課程介紹：這門課手把手帶你成為架構設計的高手'
+                  description: '思維升級：Christopher Alexander 模式六大要素及模式語言'
+                  isFreePreview: true
+                  createdAt: 1733294001561
+                  videoLength: '04:16'
+                  reward:
+                    exp: 100
+                  content:
+                    - id: 0
+                      type: 'video'
+                      url: 'https://cdn.waterballsa.tw/software-design-pattern/videos/c8m1-0/c8m1-0.m3u8'
+                      durationSeconds: 256
+              articleMission:
+                summary: Article mission example
+                value:
+                  id: 5
+                  chapterId: 10
+                  journeyId: 1
+                  type: 'ARTICLE'
+                  title: 'UML 不是英文縮寫字'
+                  description: 'UML 統一塑模語言完整介紹'
+                  isFreePreview: false
+                  createdAt: 1733294001561
+                  reward:
+                    exp: 100
+                  content:
+                    - id: 0
+                      type: 'article'
+                      url: 'https://cdn.waterballsa.tw/articles/uml-intro.html'
+              questionnaireMission:
+                summary: Questionnaire mission example
+                value:
+                  id: 7
+                  chapterId: 12
+                  journeyId: 1
+                  type: 'QUESTIONNAIRE'
+                  title: '課程回饋問卷'
+                  description: '請填寫課程回饋問卷，幫助我們改進課程內容'
+                  isFreePreview: false
+                  createdAt: 1733294001561
+                  reward:
+                    exp: 50
+                  content:
+                    - id: 0
+                      type: 'form'
+                      url: 'https://forms.waterballsa.tw/feedback-form-1'
+      '401':
+        description: Unauthorized - invalid or missing token
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            examples:
+              unauthorized:
+                summary: Invalid or missing token
+                value:
+                  error: 'Unauthorized or invalid token'
+      '404':
+        description: Mission not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            examples:
+              notFound:
+                summary: Mission does not exist
+                value:
+                  error: 'Mission not found'
+
+deliver:
+  post:
+    tags:
+      - Missions
+    summary: Deliver mission for experience points
+    description: |
+      Deliver a completed mission to receive experience points and change status to DELIVERED.
+
+      **Authentication:**
+      - Requires valid JWT token
+
+      **Requirements:**
+      - For VIDEO missions: Must have status COMPLETED (watched to the end)
+      - For ARTICLE/QUESTIONNAIRE missions: Can be delivered directly (no progress tracking)
+      - Cannot deliver if mission status is already DELIVERED
+      - Each mission can only be delivered once
+
+      **Effects:**
+      - Changes mission status from COMPLETED (or UNCOMPLETED for non-video) to DELIVERED
+      - Adds experience points to user (amount defined in mission rewards)
+      - Updates user level based on new experience points
+
+      **Level Calculation:**
+      - Level 1: 0-199 XP
+      - Level 2: 200-499 XP
+      - Level 3: 500-1499 XP
+      - Level 4: 1500-2999 XP
+      - Level 5: 3000-4999 XP
+      - Level 6: 5000-6999 XP
+      - Level 7+: +2000 XP per level
+      - Level 36 (max): 65000+ XP
+
+      **Note:**
+      - Experience points are only granted once per mission
+      - Duplicate deliveries return 409 Conflict
+    operationId: deliverMission
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: journeyId
+        in: path
+        required: true
+        description: Journey ID
+        schema:
+          type: integer
+          example: 1
+      - name: missionId
+        in: path
+        required: true
+        description: Mission ID
+        schema:
+          type: integer
+          example: 1
+    responses:
+      '200':
+        description: Mission delivered successfully
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/missions.yaml#/DeliverResponse'
+            examples:
+              success:
+                summary: Successfully delivered and gained experience
+                value:
+                  message: 'Mission delivered successfully'
+                  experienceGained: 100
+                  totalExperience: 1500
+                  currentLevel: 4
+              levelUp:
+                summary: Delivered and leveled up
+                value:
+                  message: 'Mission delivered successfully'
+                  experienceGained: 100
+                  totalExperience: 3000
+                  currentLevel: 5
+      '400':
+        description: Mission not completed or invalid state
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            examples:
+              videoNotCompleted:
+                summary: Cannot deliver incomplete video mission
+                value:
+                  error: 'Video mission must be COMPLETED before delivery'
+      '401':
+        description: Unauthorized - invalid or missing token
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            examples:
+              unauthorized:
+                summary: Invalid or missing token
+                value:
+                  error: 'Unauthorized or invalid token'
+      '404':
+        description: Mission not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            examples:
+              notFound:
+                summary: Mission does not exist
+                value:
+                  error: 'Mission not found'
+      '409':
+        description: Mission already delivered
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            examples:
+              duplicate:
+                summary: Cannot deliver twice
+                value:
+                  error: 'Mission has already been delivered'
