@@ -72,7 +72,7 @@ paths:
   /orders/{orderId}:
     $ref: './openapi/paths/orders.yaml#/detail'
 
-  /orders/{orderId}/pay:
+  /orders/{orderId}/action/pay:
     $ref: './openapi/paths/orders.yaml#/pay'
 
   /users/{userId}/orders:

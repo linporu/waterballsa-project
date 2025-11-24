@@ -1293,7 +1293,7 @@ paths:
                   summary: Order does not exist or access denied
                   value:
                     error: Order not found
-  '/orders/{orderId}/pay':
+  '/orders/{orderId}/action/pay':
     post:
       tags:
         - Orders
