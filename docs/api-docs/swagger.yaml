@@ -30,6 +30,10 @@ tags:
     description: User mission progress tracking endpoints
   - name: Users
     description: User profile and information endpoints
+  - name: Orders
+    description: Course purchase order management endpoints
+  - name: User Journeys
+    description: User purchased journey access management endpoints
 
 paths:
   /healthz:
@@ -61,6 +65,21 @@ paths:
 
   /users/me:
     $ref: './openapi/paths/users.yaml#/me'
+
+  /orders:
+    $ref: './openapi/paths/orders.yaml#/create'
+
+  /orders/{orderId}:
+    $ref: './openapi/paths/orders.yaml#/detail'
+
+  /orders/{orderId}/action/pay:
+    $ref: './openapi/paths/orders.yaml#/pay'
+
+  /users/{userId}/orders:
+    $ref: './openapi/paths/users.yaml#/orders'
+
+  /users/{userId}/journeys:
+    $ref: './openapi/paths/users.yaml#/journeys'
 
 components:
   securitySchemes:
@@ -134,3 +153,31 @@ components:
     # User schemas
     UserProfile:
       $ref: './openapi/schemas/users.yaml#/UserProfile'
+
+    # Order schemas
+    CreateOrderRequest:
+      $ref: './openapi/schemas/orders.yaml#/CreateOrderRequest'
+    OrderResponse:
+      $ref: './openapi/schemas/orders.yaml#/OrderResponse'
+    OrderItem:
+      $ref: './openapi/schemas/orders.yaml#/OrderItem'
+    PayOrderResponse:
+      $ref: './openapi/schemas/orders.yaml#/PayOrderResponse'
+    OrderListResponse:
+      $ref: './openapi/schemas/orders.yaml#/OrderListResponse'
+    OrderSummary:
+      $ref: './openapi/schemas/orders.yaml#/OrderSummary'
+    OrderItemSummary:
+      $ref: './openapi/schemas/orders.yaml#/OrderItemSummary'
+    Pagination:
+      $ref: './openapi/schemas/orders.yaml#/Pagination'
+
+    # User Journey schemas
+    UserJourneyListResponse:
+      $ref: './openapi/schemas/users.yaml#/UserJourneyListResponse'
+    UserJourneyItem:
+      $ref: './openapi/schemas/users.yaml#/UserJourneyItem'
+
+    # Journey purchase status schema
+    UserStatus:
+      $ref: './openapi/schemas/journeys.yaml#/UserStatus'

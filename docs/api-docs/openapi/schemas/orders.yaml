@@ -1,0 +1,272 @@
+CreateOrderRequest:
+  type: object
+  required:
+    - items
+  properties:
+    items:
+      type: array
+      description: List of items to purchase
+      minItems: 1
+      items:
+        type: object
+        required:
+          - journeyId
+          - quantity
+        properties:
+          journeyId:
+            type: integer
+            description: ID of the journey to purchase
+            example: 17
+          quantity:
+            type: integer
+            description: Quantity to purchase
+            minimum: 1
+            default: 1
+            example: 1
+
+OrderResponse:
+  type: object
+  required:
+    - id
+    - orderNumber
+    - userId
+    - username
+    - status
+    - originalPrice
+    - discount
+    - price
+    - items
+    - createdAt
+  properties:
+    id:
+      type: integer
+      description: Order ID
+      example: 123
+    orderNumber:
+      type: string
+      description: |
+        Unique order number with format: {timestamp}{userId}{randomCode}
+        Example: 20251121011117cd5 = 2025112101 (timestamp) + 11 (userId) + 17cd5 (random)
+      example: '20251121011117cd5'
+    userId:
+      type: integer
+      description: User ID who created this order
+      example: 11
+    username:
+      type: string
+      description: Username of the order owner
+      example: 'john_doe'
+    status:
+      type: string
+      enum:
+        - UNPAID
+        - PAID
+      description: |
+        Order status:
+        - UNPAID: Order created but not yet paid
+        - PAID: Payment completed, user has journey access
+      example: 'UNPAID'
+    originalPrice:
+      type: number
+      format: decimal
+      description: Total original price (sum of all item original prices)
+      example: 7599.00
+    discount:
+      type: number
+      format: decimal
+      description: Total discount amount
+      example: 0.00
+    price:
+      type: number
+      format: decimal
+      description: Final amount to pay (originalPrice - discount)
+      example: 7599.00
+    items:
+      type: array
+      description: List of order items (journeys to purchase)
+      items:
+        $ref: '#/OrderItem'
+    createdAt:
+      type: integer
+      format: int64
+      description: Order creation timestamp (milliseconds since epoch)
+      example: 1732420800000
+    paidAt:
+      type: integer
+      format: int64
+      description: Payment completion timestamp (null if not paid yet)
+      example: 1732507200000
+      nullable: true
+
+OrderItem:
+  type: object
+  required:
+    - journeyId
+    - journeyTitle
+    - quantity
+    - originalPrice
+    - discount
+    - price
+  properties:
+    journeyId:
+      type: integer
+      description: Journey ID
+      example: 17
+    journeyTitle:
+      type: string
+      description: Journey title (snapshot at order creation time)
+      example: 'AI x BDD：規格驅動全自動開發術'
+    quantity:
+      type: integer
+      description: Quantity of this journey (always 1 in MVP)
+      example: 1
+    originalPrice:
+      type: number
+      format: decimal
+      description: Journey price at order creation time (locked price)
+      example: 7599.00
+    discount:
+      type: number
+      format: decimal
+      description: Discount applied to this item
+      example: 0.00
+    price:
+      type: number
+      format: decimal
+      description: Final price for this item (originalPrice - discount)
+      example: 7599.00
+
+PayOrderResponse:
+  type: object
+  required:
+    - id
+    - orderNumber
+    - status
+    - price
+    - paidAt
+    - message
+  properties:
+    id:
+      type: integer
+      description: Order ID
+      example: 123
+    orderNumber:
+      type: string
+      description: Order number
+      example: '20251121011117cd5'
+    status:
+      type: string
+      enum:
+        - PAID
+      description: Order status (always PAID after successful payment)
+      example: 'PAID'
+    price:
+      type: number
+      format: decimal
+      description: Amount paid
+      example: 7599.00
+    paidAt:
+      type: integer
+      format: int64
+      description: Payment completion timestamp (milliseconds since epoch)
+      example: 1732507200000
+    message:
+      type: string
+      description: Success message
+      example: '付款完成'
+
+OrderListResponse:
+  type: object
+  required:
+    - orders
+    - pagination
+  properties:
+    orders:
+      type: array
+      description: List of order summaries
+      items:
+        $ref: '#/OrderSummary'
+    pagination:
+      $ref: '#/Pagination'
+
+OrderSummary:
+  type: object
+  required:
+    - id
+    - orderNumber
+    - status
+    - price
+    - items
+    - createdAt
+  properties:
+    id:
+      type: integer
+      description: Order ID
+      example: 123
+    orderNumber:
+      type: string
+      description: Order number
+      example: '20251121011117cd5'
+    status:
+      type: string
+      enum:
+        - UNPAID
+        - PAID
+      description: Order status
+      example: 'UNPAID'
+    price:
+      type: number
+      format: decimal
+      description: Final amount to pay
+      example: 7599.00
+    items:
+      type: array
+      description: Simplified order items (for list display)
+      items:
+        $ref: '#/OrderItemSummary'
+    createdAt:
+      type: integer
+      format: int64
+      description: Order creation timestamp
+      example: 1732420800000
+    paidAt:
+      type: integer
+      format: int64
+      description: Payment completion timestamp (null if unpaid)
+      example: 1732507200000
+      nullable: true
+
+OrderItemSummary:
+  type: object
+  required:
+    - journeyId
+    - journeyTitle
+  properties:
+    journeyId:
+      type: integer
+      description: Journey ID
+      example: 17
+    journeyTitle:
+      type: string
+      description: Journey title
+      example: 'AI x BDD：規格驅動全自動開發術'
+
+Pagination:
+  type: object
+  required:
+    - page
+    - limit
+    - total
+  properties:
+    page:
+      type: integer
+      description: Current page number (starts from 1)
+      example: 1
+    limit:
+      type: integer
+      description: Number of items per page
+      example: 20
+    total:
+      type: integer
+      description: Total number of items
+      example: 5

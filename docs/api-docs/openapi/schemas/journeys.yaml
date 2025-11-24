@@ -75,6 +75,8 @@ JourneyDetail:
       description: List of chapters in this journey
       items:
         $ref: '#/Chapter'
+    userStatus:
+      $ref: '#/UserStatus'
 
 Chapter:
   type: object
@@ -159,3 +161,35 @@ MissionSummary:
         For unauthenticated requests, this field will be null or omitted.
       example: 'UNCOMPLETED'
       nullable: true
+
+UserStatus:
+  type: object
+  required:
+    - hasPurchased
+    - hasUnpaidOrder
+  properties:
+    hasPurchased:
+      type: boolean
+      description: |
+        Whether the user has purchased this journey.
+        - true: User owns this journey (has PAID order)
+        - false: User does not own this journey
+      example: true
+    hasUnpaidOrder:
+      type: boolean
+      description: |
+        Whether the user has an unpaid order for this journey.
+        - true: User has created an order but not yet paid
+        - false: User has no unpaid order
+      example: false
+    unpaidOrderId:
+      type: integer
+      description: |
+        The ID of the unpaid order for this journey (if hasUnpaidOrder is true).
+        Frontend can use this to redirect user to the payment page.
+      example: 123
+      nullable: true
+  nullable: true
+  description: |
+    User's purchase status for this journey. Only included when user is authenticated.
+    For unauthenticated requests, this field will be null.
