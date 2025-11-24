@@ -68,3 +68,202 @@ me:
                 summary: User not found
                 value:
                   error: 'User not found'
+
+journeys:
+  get:
+    tags:
+      - Users
+    summary: Get user's purchased journeys
+    description: |
+      Returns a list of journeys that the user has purchased (has access to).
+
+      **Authentication Required:**
+      - User must be logged in
+      - User can only view their own purchased journeys (returns 404 if trying to access another user's journeys)
+
+      **Use Cases:**
+      - Check if user has purchased a specific journey
+      - Display user's course library
+      - Verify journey access before allowing content viewing
+
+      **Response:**
+      - List of purchased journeys with basic information
+      - Purchase timestamp (when payment was completed)
+      - Related order number for reference
+
+      **Note:**
+      - Only includes journeys with PAID orders (UNPAID orders do not grant access)
+      - Frontend can use this list to determine whether to show "繼續學習" or "立即加入課程" button
+    operationId: getUserJourneys
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        description: User ID
+        schema:
+          type: integer
+          example: 11
+    responses:
+      '200':
+        description: Successfully retrieved user's purchased journeys
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/users.yaml#/UserJourneyListResponse'
+            examples:
+              success:
+                summary: User's purchased journey list
+                value:
+                  journeys:
+                    - journeyId: 17
+                      journeyTitle: 'AI x BDD：規格驅動全自動開發術'
+                      journeySlug: 'ai-bdd-spec-driven-development'
+                      coverImageUrl: 'https://example.com/covers/ai-bdd.jpg'
+                      teacherName: '水球潘'
+                      purchasedAt: 1732507200000
+                      orderNumber: '20251121011117cd5'
+                    - journeyId: 15
+                      journeyTitle: '軟體設計模式精通之旅'
+                      journeySlug: 'software-design-patterns'
+                      coverImageUrl: 'https://example.com/covers/design-patterns.jpg'
+                      teacherName: '水球潘'
+                      purchasedAt: 1732334400000
+                      orderNumber: '20251119011115b2c'
+              empty:
+                summary: User has no purchased journeys
+                value:
+                  journeys: []
+      '401':
+        description: Unauthorized - user not logged in
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            examples:
+              unauthorized:
+                summary: User not authenticated
+                value:
+                  error: 'Authentication required'
+      '404':
+        description: User not found or access denied
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            examples:
+              notFound:
+                summary: User does not exist or access denied
+                value:
+                  error: 'User not found'
+
+orders:
+  get:
+    tags:
+      - Users
+    summary: Get user's order list
+    description: |
+      Returns a list of orders for a specific user.
+
+      **Authentication Required:**
+      - User must be logged in
+      - User can only view their own orders (returns 404 if trying to access another user's orders)
+
+      **Use Cases:**
+      - Display order list in "訂單管理" section
+      - Allow users to review their order history
+
+      **Query Parameters:**
+      - page: Page number for pagination (optional, default: 1)
+      - limit: Items per page (optional, default: 20)
+
+      **Response:**
+      - List of all order summaries (basic order info + first journey item)
+      - Pagination metadata
+      - Orders are sorted by creation time (newest first)
+    operationId: getUserOrders
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        description: User ID
+        schema:
+          type: integer
+          example: 11
+      - name: page
+        in: query
+        required: false
+        description: Page number (starts from 1)
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          example: 1
+      - name: limit
+        in: query
+        required: false
+        description: Number of items per page
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+          example: 20
+    responses:
+      '200':
+        description: Successfully retrieved order list
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/orders.yaml#/OrderListResponse'
+            examples:
+              success:
+                summary: User order list with pagination
+                value:
+                  orders:
+                    - id: 125
+                      orderNumber: '20251122011117f3a'
+                      status: 'UNPAID'
+                      price: 5999.00
+                      items:
+                        - journeyId: 18
+                          journeyTitle: 'Web 開發實戰'
+                      createdAt: 1732593600000
+                    - id: 123
+                      orderNumber: '20251121011117cd5'
+                      status: 'PAID'
+                      price: 7599.00
+                      items:
+                        - journeyId: 17
+                          journeyTitle: 'AI x BDD：規格驅動全自動開發術'
+                      createdAt: 1732420800000
+                      paidAt: 1732507200000
+                  pagination:
+                    page: 1
+                    limit: 20
+                    total: 2
+      '401':
+        description: Unauthorized - user not logged in
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            examples:
+              unauthorized:
+                summary: User not authenticated
+                value:
+                  error: 'Authentication required'
+      '404':
+        description: User not found or access denied
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            examples:
+              notFound:
+                summary: User does not exist or access denied
+                value:
+                  error: 'User not found'

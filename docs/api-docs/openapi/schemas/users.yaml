@@ -34,3 +34,56 @@ UserProfile:
         - ADMIN
       description: User role
       example: 'STUDENT'
+
+UserJourneyListResponse:
+  type: object
+  required:
+    - journeys
+  properties:
+    journeys:
+      type: array
+      description: List of journeys the user has purchased
+      items:
+        $ref: '#/UserJourneyItem'
+
+UserJourneyItem:
+  type: object
+  required:
+    - journeyId
+    - journeyTitle
+    - journeySlug
+    - coverImageUrl
+    - teacherName
+    - purchasedAt
+    - orderNumber
+  properties:
+    journeyId:
+      type: integer
+      description: Journey ID
+      example: 17
+    journeyTitle:
+      type: string
+      description: Journey title
+      example: 'AI x BDD：規格驅動全自動開發術'
+    journeySlug:
+      type: string
+      description: URL-friendly journey identifier
+      example: 'ai-bdd-spec-driven-development'
+    coverImageUrl:
+      type: string
+      format: uri
+      description: Journey cover image URL
+      example: 'https://example.com/covers/ai-bdd.jpg'
+    teacherName:
+      type: string
+      description: Teacher name
+      example: '水球潘'
+    purchasedAt:
+      type: integer
+      format: int64
+      description: Purchase timestamp - when the order was paid (milliseconds since epoch)
+      example: 1732507200000
+    orderNumber:
+      type: string
+      description: Order number that granted access to this journey
+      example: '20251121011117cd5'
