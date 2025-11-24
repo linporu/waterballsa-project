@@ -1721,6 +1721,7 @@ components:
         - description
         - coverImageUrl
         - teacherName
+        - price
       properties:
         id:
           type: integer
@@ -1747,6 +1748,10 @@ components:
           type: string
           description: Teacher name
           example: 水球潘
+        price:
+          type: integer
+          description: Journey price in TWD (New Taiwan Dollar)
+          example: 3990
     JourneyDetail:
       type: object
       required:
@@ -1756,6 +1761,7 @@ components:
         - description
         - coverImageUrl
         - teacherName
+        - price
         - chapters
       properties:
         id:
@@ -1783,6 +1789,10 @@ components:
           type: string
           description: Teacher name
           example: 水球潘
+        price:
+          type: integer
+          description: Journey price in TWD (New Taiwan Dollar)
+          example: 3990
         chapters:
           type: array
           description: List of chapters in this journey
