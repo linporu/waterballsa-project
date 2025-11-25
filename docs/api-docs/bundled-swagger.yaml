@@ -1925,7 +1925,7 @@ components:
         - isFreePreview
         - createdAt
         - reward
-        - content
+        - resource
       properties:
         id:
           type: integer
@@ -1970,11 +1970,11 @@ components:
           example: '04:16'
         reward:
           $ref: '#/components/schemas/MissionReward'
-        content:
+        resource:
           type: array
-          description: Mission content array (can have multiple items)
+          description: Mission resource array (can have multiple items)
           items:
-            $ref: '#/components/schemas/MissionContent'
+            $ref: '#/components/schemas/MissionResource'
     MissionReward:
       type: object
       required:
@@ -1984,16 +1984,15 @@ components:
           type: integer
           description: Experience points reward
           example: 100
-    MissionContent:
+    MissionResource:
       type: object
       required:
         - type
-        - url
         - id
       properties:
         id:
           type: integer
-          description: Content item ID
+          description: Resource item ID
           example: 0
         type:
           type: string
@@ -2001,13 +2000,17 @@ components:
             - video
             - article
             - form
-          description: Content type (lowercase)
+          description: Resource type (lowercase)
           example: video
-        url:
+        resourceUrl:
           type: string
           format: uri
-          description: Content URL
+          description: 'Resource URL (optional, required for video/external content)'
           example: 'https://cdn.waterballsa.tw/software-design-pattern/videos/c8m1-0/c8m1-0.m3u8'
+        resourceContent:
+          type: string
+          description: 'Resource content (optional, for inline text content)'
+          example: Article content or form HTML here
         durationSeconds:
           type: integer
           description: Video duration in seconds (VIDEO type only)
