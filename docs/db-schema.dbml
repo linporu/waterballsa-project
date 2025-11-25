@@ -173,20 +173,21 @@ Table rewards {
 }
 
 // ============================================================
-// 4. 任務內容模組 (Mission Contents Module)
+// 4. 任務資源模組 (Mission Resources Module)
 // ============================================================
 
-Enum content_type {
+Enum resource_type {
   VIDEO [note: '影片內容']
   ARTICLE [note: '文章內容']
   FORM [note: '表單']
 }
 
-Table mission_contents {
+Table mission_resources {
   id bigserial [primary key]
   mission_id bigint [not null, ref: > missions.id, note: '關聯的任務 ID']
-  content_type content_type [not null, note: '內容類型']
-  content_url varchar(1000) [not null, note: '內容 URL 或路徑']
+  resource_type resource_type [not null, note: '資源類型']
+  resource_url varchar(1000) [null, note: '資源 URL 或路徑（可選）']
+  resource_content text [null, note: '資源內容（可選，可存放文字內容）']
   content_order integer [not null, default: 0, note: '內容順序（同一任務內的排序）']
   duration_seconds integer [null, note: '影片長度（秒，僅 VIDEO 類型使用）']
   created_at timestamp [not null, default: `now()`]
@@ -194,11 +195,11 @@ Table mission_contents {
   deleted_at timestamp [null, note: '軟刪除時間戳']
 
   indexes {
-    mission_id [name: 'idx_contents_mission_id']
-    (mission_id, content_order) [unique, name: 'idx_contents_mission_order']
+    mission_id [name: 'idx_resources_mission_id']
+    (mission_id, content_order) [unique, name: 'idx_resources_mission_order']
   }
 
-  note: '任務內容表，支援單一任務擁有多個內容項目（如多段影片、混合影片與文章等）'
+  note: '任務資源表，支援單一任務擁有多個資源項目（如多段影片、混合影片與文章等）。資源可透過 URL 或直接內容提供。'
 }
 
 // ============================================================
