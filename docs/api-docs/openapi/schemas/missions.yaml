@@ -10,7 +10,7 @@ MissionDetail:
     - isFreePreview
     - createdAt
     - reward
-    - content
+    - resource
   properties:
     id:
       type: integer
@@ -55,7 +55,7 @@ MissionDetail:
       example: '04:16'
     reward:
       $ref: '#/MissionReward'
-    content:
+    resource:
       type: array
       description: Mission resource array (can have multiple items)
       items:
